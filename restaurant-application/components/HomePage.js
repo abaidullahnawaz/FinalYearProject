@@ -7,6 +7,8 @@ import {
   Image,
   Dimensions,
   TextInput,
+  ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import TopBanner from "./Top_Banner";
 import restaurants from "./restaurant.json";
@@ -17,19 +19,28 @@ const cardWidth = screenWidth / 2 - 20;
 
 export default function HomePage() {
   const [searchText, setSearchText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
+  /* ✅ Get Unique Categories */
+  const categories = useMemo(() => {
+    const unique = [...new Set(restaurants.map((r) => r.category))];
+    return ["All", ...unique];
+  }, []);
 
-
-  // Filtered Data (Search Only)
+  /* ✅ Filtered Data (Search + Category) */
   const filteredRestaurants = useMemo(() => {
     return restaurants.filter((restaurant) => {
       const matchesSearch = restaurant.restaurantName
         .toLowerCase()
         .includes(searchText.toLowerCase());
 
-      return matchesSearch;
+      const matchesCategory =
+        selectedCategory === "All" ||
+        restaurant.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
     });
-  }, [searchText]);
+  }, [searchText, selectedCategory]);
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
@@ -44,7 +55,7 @@ export default function HomePage() {
     <View style={styles.container}>
       <TopBanner />
 
-      {/* Search Bar */}
+      {/* 🔎 Search Bar */}
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Search restaurants..."
@@ -54,9 +65,32 @@ export default function HomePage() {
         />
       </View>
 
-    
+      {/* ✅ Filter Tags */}
+      <View style={styles.filtersContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {categories.map((category, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => setSelectedCategory(category)}
+              style={[
+                styles.filterTag,
+                selectedCategory === category && styles.activeFilter,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.filterText,
+                  selectedCategory === category && styles.activeFilterText,
+                ]}
+              >
+                {category}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
-      {/* Restaurant List */}
+      {/* 🍽 Restaurant List */}
       <FlatList
         data={filteredRestaurants}
         keyExtractor={(item) => item.id.toString()}
@@ -123,4 +157,32 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     color: "#888",
   },
+   /* Filters */
+filtersContainer: {
+  marginTop: 15,
+  marginBottom: 10,
+  paddingLeft: 15,
+},
+
+filterTag: {
+  backgroundColor: "#eee",
+  paddingHorizontal: 15,
+  paddingVertical: 8,
+  borderRadius: 20,
+  marginRight: 10,
+},
+
+filterText: {
+  fontSize: 12,
+  color: "#555",
+},
+
+activeFilter: {
+  backgroundColor: "#9E090F",
+},
+
+activeFilterText: {
+  color: "#fff",
+  fontWeight: "600",
+},
 });
