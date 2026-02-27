@@ -1,0 +1,107 @@
+[
+  {
+    "id": 1,
+    "restaurantName": "Spice Garden",
+    "location": "Lahore, Pakistan",
+    "category": "Pakistani",
+    "description": "Authentic traditional Pakistani cuisine with rich spices and desi flavors.",
+    "rating": 4.5,
+    "image": "spicegarden",
+    "meals": [
+      {
+        "id": 101,
+        "mealName": "Chicken Biryani",
+        "image": "chickenbiryani"
+      },
+      {
+        "id": 102,
+        "mealName": "Beef Karahi",
+        "image": "beefkarahi"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "restaurantName": "Urban Bites",
+    "location": "Dubai, UAE",
+    "category": "Fusion",
+    "description": "Modern fusion dining experience combining international flavors.",
+    "rating": 4.2,
+    "image": "urbanbites",
+    "meals": [
+      {
+        "id": 201,
+        "mealName": "Grilled Chicken Steak",
+        "image": "grilledchicken"
+      },
+      {
+        "id": 202,
+        "mealName": "Creamy Alfredo Pasta",
+        "image": "alfredopasta"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "restaurantName": "Pizza Hub",
+    "location": "London, UK",
+    "category": "Italian",
+    "description": "Authentic Italian pizzas baked in traditional wood-fired ovens.",
+    "rating": 4.7,
+    "image": "pizzahub",
+    "meals": [
+      {
+        "id": 301,
+        "mealName": "Margherita Pizza",
+        "image": "margheritapizza"
+      },
+      {
+        "id": 302,
+        "mealName": "Pepperoni Pizza",
+        "image": "pepperonipizza"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "restaurantName": "Sushi World",
+    "location": "Tokyo, Japan",
+    "category": "Japanese",
+    "description": "Fresh sushi and sashimi prepared by expert chefs.",
+    "rating": 4.8,
+    "image": "sushiworld",
+    "meals": [
+      {
+        "id": 401,
+        "mealName": "Salmon Sushi",
+        "image": "salmonsushi"
+      },
+      {
+        "id": 402,
+        "mealName": "Tempura Rolls",
+        "image": "tempurarolls"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "restaurantName": "Burger Factory",
+    "location": "New York, USA",
+    "category": "Fast Food",
+    "description": "Juicy handcrafted burgers with premium ingredients.",
+    "rating": 4.1,
+    "image": "burgerfactory",
+    "meals": [
+      {
+        "id": 501,
+        "mealName": "Classic Beef Burger",
+        "image": "beefburger"
+      },
+      {
+        "id": 502,
+        "mealName": "Chicken Crunch Burger",
+        "image": "chickenburger"
+      }
+    ]
+  }
+]

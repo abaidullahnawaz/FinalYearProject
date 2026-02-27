@@ -1,0 +1,17 @@
+export const imageMap = {
+  spicegarden: require("../assets/spicegarden_logo.png"),
+  urbanbites: require("../assets/urbanBites_logo.jfif"),
+  chickenbiryani: require("../assets/chickenBiryani.jpg"),
+  beefkarahi: require("../assets/beefkarahi.jpg"),
+  grilledchicken: require("../assets/girlledChicken.webp"),
+  alfredopasta: require("../assets/alfredoPasta.webp"),
+  pizzahub: require("../assets/pizzahub_logo.png"),
+  margheritapizza: require("../assets/margheritapizza.jpg"),
+  pepperonipizza: require("../assets/pepperonipizza.htm"),
+  sushiworld: require("../assets/sushiworld_logo.avif"),
+  salmonshushi: require("../assets/salmonsushi.jfif"),
+  tempurarolls: require("../assets/tempuraroll.jfif"),
+  burgerfactory: require("../assets/burgerfactory_logo.png"),
+  beefburger: require("../assets/beefburger.jfif"),
+  chickenburger: require("../assets/chickenburger.jfif"),
+};
