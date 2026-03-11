@@ -13,6 +13,7 @@ import {
 import TopBanner from "./Top_Banner";
 import restaurants from "./restaurant.json";
 import { imageMap } from "./imageMap";
+import { useNavigation } from "@react-navigation/native";
 
 const screenWidth = Dimensions.get("window").width;
 const cardWidth = screenWidth / 2 - 20;
@@ -20,8 +21,7 @@ const cardWidth = screenWidth / 2 - 20;
 export default function HomePage() {
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-
-  /* ✅ Get Unique Categories */
+const navigation = useNavigation();
   const categories = useMemo(() => {
     const unique = [...new Set(restaurants.map((r) => r.category))];
     return ["All", ...unique];
@@ -43,13 +43,18 @@ export default function HomePage() {
   }, [searchText, selectedCategory]);
 
   const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Image source={imageMap[item.image]} style={styles.image} />
-      <Text style={styles.name}>{item.restaurantName}</Text>
-      <Text style={styles.rating}>⭐ {item.rating}</Text>
-      <Text style={styles.category}>{item.category}</Text>
-    </View>
-  );
+  <TouchableOpacity
+  style={styles.card}
+  onPress={() =>
+    navigation.navigate("RestaurantDetails", { restaurant: item })
+  }
+>
+    <Image source={imageMap[item.image]} style={styles.image} />
+    <Text style={styles.name}>{item.restaurantName}</Text>
+    <Text style={styles.rating}>⭐ {item.rating}</Text>
+    <Text style={styles.category}>{item.category}</Text>
+  </TouchableOpacity>
+);
 
   return (
     <View style={styles.container}>
