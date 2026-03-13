@@ -17,6 +17,26 @@
         "id": 102,
         "mealName": "Beef Karahi",
         "image": "beefkarahi"
+      },
+      {
+        "id": 103,
+        "mealName": "Chicken Biryani",
+        "image": "chickenbiryani"
+      },
+      {
+        "id": 104,
+        "mealName": "Beef Karahi",
+        "image": "beefkarahi"
+      },
+      {
+        "id": 103,
+        "mealName": "Chicken Biryani",
+        "image": "chickenbiryani"
+      },
+      {
+        "id": 104,
+        "mealName": "Beef Karahi",
+        "image": "beefkarahi"
       }
     ]
   },
@@ -36,6 +56,26 @@
       },
       {
         "id": 202,
+        "mealName": "Creamy Alfredo Pasta",
+        "image": "alfredopasta"
+      },
+      {
+        "id": 203,
+        "mealName": "Grilled Chicken Steak",
+        "image": "grilledchicken"
+      },
+      {
+        "id": 204,
+        "mealName": "Creamy Alfredo Pasta",
+        "image": "alfredopasta"
+      },
+      {
+        "id": 205,
+        "mealName": "Grilled Chicken Steak",
+        "image": "grilledchicken"
+      },
+      {
+        "id": 206,
         "mealName": "Creamy Alfredo Pasta",
         "image": "alfredopasta"
       }
@@ -59,6 +99,26 @@
         "id": 302,
         "mealName": "Pepperoni Pizza",
         "image": "pepperonipizza"
+      },
+      {
+        "id": 303,
+        "mealName": "Margherita Pizza",
+        "image": "margheritapizza"
+      },
+      {
+        "id": 304,
+        "mealName": "Pepperoni Pizza",
+        "image": "pepperonipizza"
+      },
+      {
+        "id": 305,
+        "mealName": "Margherita Pizza",
+        "image": "margheritapizza"
+      },
+      {
+        "id": 306,
+        "mealName": "Pepperoni Pizza",
+        "image": "pepperonipizza"
       }
     ]
   },
@@ -80,6 +140,26 @@
         "id": 402,
         "mealName": "Tempura Rolls",
         "image": "tempurarolls"
+      },
+      {
+        "id": 403,
+        "mealName": "Salmon Sushi",
+        "image": "salmonsushi"
+      },
+      {
+        "id": 404,
+        "mealName": "Tempura Rolls",
+        "image": "tempurarolls"
+      },
+      {
+        "id": 405,
+        "mealName": "Salmon Sushi",
+        "image": "salmonsushi"
+      },
+      {
+        "id": 406,
+        "mealName": "Tempura Rolls",
+        "image": "tempurarolls"
       }
     ]
   },
@@ -99,6 +179,26 @@
       },
       {
         "id": 502,
+        "mealName": "Chicken Crunch Burger",
+        "image": "chickenburger"
+      },
+      {
+        "id": 503,
+        "mealName": "Classic Beef Burger",
+        "image": "beefburger"
+      },
+      {
+        "id": 504,
+        "mealName": "Chicken Crunch Burger",
+        "image": "chickenburger"
+      },
+      {
+        "id": 505,
+        "mealName": "Classic Beef Burger",
+        "image": "beefburger"
+      },
+      {
+        "id": 506,
         "mealName": "Chicken Crunch Burger",
         "image": "chickenburger"
       }
