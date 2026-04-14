@@ -5,8 +5,9 @@ import { Image, StyleSheet } from "react-native";
 
 import Page1 from "./HomePage";
 import ReviewPage from "./ReviewPage";
-import Page3 from "./Page3";
+import Favourites from "./Favourites";
 import RestaurantDetails from "./RestaurantDetails";
+import Profile from "./Profile"
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -54,12 +55,25 @@ function TabNavigator() {
 
       <Tab.Screen
         name="Favourites"
-        component={Page3}
+        component={Favourites}
         options={{
           tabBarIcon: ({ color }) => (
             <Image
               source={require("../assets/heart.png")}
-              style={{ width: 23, height: 23, tintColor: color }}
+              style={{ width: 22, height: 21, tintColor: color }}
+            />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Image
+              source={require("../assets/profile_icon_unselected.png")}
+              style={{ width: 24, height: 24, tintColor: color }}
             />
           ),
         }}
@@ -87,7 +101,7 @@ const styles = StyleSheet.create({
     right: 5,
     backgroundColor: "#9E090F",
     borderRadius: 37,
-    height: 50,
+    height: 55,
   },
 });
 

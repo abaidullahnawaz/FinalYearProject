@@ -18,16 +18,21 @@ import { useNavigation } from "@react-navigation/native";
 const screenWidth = Dimensions.get("window").width;
 const cardWidth = screenWidth / 2 - 20;
 
+// ✅ Shared variable
+export let sharedFavourites = [];
+
 export default function HomePage() {
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-const navigation = useNavigation();
+  const [favourites, setFavourites] = useState([]);
+
+  const navigation = useNavigation();
+
   const categories = useMemo(() => {
     const unique = [...new Set(restaurants.map((r) => r.category))];
     return ["All", ...unique];
   }, []);
 
-  /* ✅ Filtered Data (Search + Category) */
   const filteredRestaurants = useMemo(() => {
     return restaurants.filter((restaurant) => {
       const matchesSearch = restaurant.restaurantName
@@ -42,25 +47,59 @@ const navigation = useNavigation();
     });
   }, [searchText, selectedCategory]);
 
+  const toggleFavourite = (item) => {
+    const exists = favourites.find((r) => r.id === item.id);
+
+    let updated;
+
+    if (exists) {
+      updated = favourites.filter((r) => r.id !== item.id);
+    } else {
+      updated = [...favourites, item];
+    }
+
+    setFavourites(updated);
+
+    // ✅ Sync globally
+    sharedFavourites = updated;
+  };
+
+  const isFavourite = (id) => {
+    return favourites.some((r) => r.id === id);
+  };
+
   const renderItem = ({ item }) => (
-  <TouchableOpacity
-  style={styles.card}
-  onPress={() =>
-    navigation.navigate("RestaurantDetails", { restaurant: item })
-  }
->
-    <Image source={imageMap[item.image]} style={styles.image} />
-    <Text style={styles.name}>{item.restaurantName}</Text>
-    <Text style={styles.rating}>⭐ {item.rating}</Text>
-    <Text style={styles.category}>{item.category}</Text>
-  </TouchableOpacity>
-);
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() =>
+        navigation.navigate("RestaurantDetails", { restaurant: item })
+      }
+    >
+      {/* ❤️ Heart Icon */}
+      <TouchableOpacity
+        style={styles.heartIcon}
+        onPress={(e) => {
+          e.stopPropagation(); // prevent navigation
+          toggleFavourite(item);
+        }}
+      >
+        <Text style={{ fontSize: 18 }}>
+          {isFavourite(item.id) ? "❤️" : "🤍"}
+        </Text>
+      </TouchableOpacity>
+
+      <Image source={imageMap[item.image]} style={styles.image} />
+      <Text style={styles.name}>{item.restaurantName}</Text>
+      <Text style={styles.rating}>⭐ {item.rating}</Text>
+      <Text style={styles.category}>{item.category}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
       <TopBanner />
 
-      {/* 🔎 Search Bar */}
+      {/* 🔎 Search */}
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Search restaurants..."
@@ -70,7 +109,7 @@ const navigation = useNavigation();
         />
       </View>
 
-      {/* ✅ Filter Tags */}
+      {/* Filters */}
       <View style={styles.filtersContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {categories.map((category, index) => (
@@ -95,7 +134,7 @@ const navigation = useNavigation();
         </ScrollView>
       </View>
 
-      {/* 🍽 Restaurant List */}
+      {/* 🍽 List */}
       <FlatList
         data={filteredRestaurants}
         keyExtractor={(item) => item.id.toString()}
@@ -106,6 +145,7 @@ const navigation = useNavigation();
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -189,5 +229,23 @@ activeFilter: {
 activeFilterText: {
   color: "#fff",
   fontWeight: "600",
+},
+
+heartIcon: {
+  position: "absolute",
+  top: 8,
+  right: 8,
+  zIndex: 10,
+},
+
+favButton: {
+  position: "absolute",
+  bottom: 20,
+  left: 20,
+  right: 20,
+  backgroundColor: "#9E090F",
+  padding: 15,
+  borderRadius: 10,
+  alignItems: "center",
 },
 });
