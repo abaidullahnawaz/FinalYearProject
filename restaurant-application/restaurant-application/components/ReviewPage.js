@@ -14,9 +14,14 @@ import {
 import TopBanner from "./Top_Banner";
 import { imageMap } from "./imageMap";
 import Sentiment from "sentiment";
+import restaurants from "./restaurant.json";
+import { useNavigation } from "@react-navigation/native";
 
 export default function ReviewPage({ route }) {
-  const { restaurant } = route.params;
+  const restaurant = route.params?.restaurant || null;
+
+  const [selectedRestaurant, setSelectedRestaurant] = useState(restaurant);
+  const [restaurantDropdownVisible, setRestaurantDropdownVisible] = useState(false);
 
   const [reviewText, setReviewText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,12 +31,15 @@ export default function ReviewPage({ route }) {
 
   const [ratingModalVisible, setRatingModalVisible] = useState(false);
   const [ratingMessage, setRatingMessage] = useState("");
+const navigation = useNavigation();
 
-  const [currentRating, setCurrentRating] = useState(restaurant.rating);
+  const [currentRating, setCurrentRating] = useState(
+    restaurant?.rating || 0
+  );
   const [reviewCount, setReviewCount] = useState(50);
 
   const handleSubmit = () => {
-    if (!reviewText.trim()) return;
+    if (!reviewText.trim() || !selectedRestaurant) return;
 
     setLoading(true);
     setShowCTA(false);
@@ -41,7 +49,6 @@ export default function ReviewPage({ route }) {
       const tokens = reviewText.split(/\s+/);
       const result = sentiment.analyze(reviewText);
 
-      // Negation handling
       let adjustedScore = 0;
       tokens.forEach((word, idx) => {
         let val = sentiment.analyze(word).score;
@@ -58,12 +65,10 @@ export default function ReviewPage({ route }) {
         adjustedScore += val;
       });
 
-      // Sentiment label
       let sentimentLabel = "Neutral";
       if (adjustedScore > 1) sentimentLabel = "Positive";
       else if (adjustedScore < -1) sentimentLabel = "Negative";
 
-      // Convert to rating
       let rating = 3;
       if (adjustedScore >= 3) rating = 5;
       else if (adjustedScore >= 1) rating = 4;
@@ -86,12 +91,10 @@ export default function ReviewPage({ route }) {
       );
       setRatingModalVisible(true);
 
-      // Auto close after 2.5 sec
       setTimeout(() => {
         setRatingModalVisible(false);
       }, 2500);
 
-      // Aspect analysis
       const aspectKeywords = {
         food: ["food", "meal", "dish", "pizza", "burger", "taste", "flavor"],
         service: ["service", "waiter", "staff", "server", "helpful", "slow"],
@@ -137,16 +140,72 @@ export default function ReviewPage({ route }) {
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 20 }}>
       <TopBanner />
 
-      {/* Restaurant Info */}
-      <View style={styles.restaurantInfo}>
-        <Image source={imageMap[restaurant.image]} style={styles.restaurantImage} />
-        <View style={styles.restaurantDetails}>
-          <Text style={styles.restaurantName}>{restaurant.restaurantName}</Text>
-          <Text style={styles.infoText}>{restaurant.location}</Text>
-          <Text style={styles.infoText}>{restaurant.category}</Text>
-          <Text style={styles.infoText}>⭐ {currentRating}</Text>
-        </View>
+{/* ✅ Back Button (only if navigated from restaurant) */}
+{restaurant && (
+  <TouchableOpacity
+    onPress={() => navigation.goBack()}
+    style={styles.backButton}
+  >
+    <Text style={styles.backText}>← Back</Text>
+  </TouchableOpacity>
+)}
+      {/* ✅ Dropdown Selector */}
+      <View style={{ marginBottom: 20 }}>
+        <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
+          Select Restaurant
+        </Text>
+
+        <TouchableOpacity
+          style={{
+            borderWidth: 1,
+            borderColor: "#ccc",
+            borderRadius: 8,
+            padding: 12,
+            backgroundColor: "#fff",
+          }}
+          onPress={() => setRestaurantDropdownVisible(true)}
+        >
+          <Text>
+            {selectedRestaurant
+              ? selectedRestaurant.restaurantName
+              : "Choose a restaurant"}
+          </Text>
+        </TouchableOpacity>
       </View>
+
+      {/* Restaurant Info */}
+      {selectedRestaurant && (
+        <>
+          <View style={styles.restaurantInfo}>
+            <Image
+              source={imageMap[selectedRestaurant.image]}
+              style={styles.restaurantImage}
+            />
+            <View style={styles.restaurantDetails}>
+              <Text style={styles.restaurantName}>
+                {selectedRestaurant.restaurantName}
+              </Text>
+              <Text style={styles.infoText}>
+                {selectedRestaurant.location}
+              </Text>
+              <Text style={styles.infoText}>
+                {selectedRestaurant.category}
+              </Text>
+              <Text style={styles.infoText}>⭐ {currentRating}</Text>
+            </View>
+          </View>
+
+          {/* Change option */}
+          <TouchableOpacity
+            style={{ marginTop: 10 }}
+            onPress={() => setRestaurantDropdownVisible(true)}
+          >
+            <Text style={{ color: "#9E090F", fontWeight: "bold" }}>
+              Change Restaurant
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
 
       {/* Review Input */}
       <Text style={styles.reviewTitle}>Write your review below</Text>
@@ -175,6 +234,42 @@ export default function ReviewPage({ route }) {
           </Text>
         </TouchableOpacity>
       )}
+
+      {/* Dropdown Modal */}
+      <Modal animationType="slide" transparent={true} visible={restaurantDropdownVisible}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Restaurant</Text>
+
+            <ScrollView style={{ maxHeight: 300 }}>
+              {restaurants.map((r) => (
+                <TouchableOpacity
+                  key={r.id}
+                  style={{
+                    padding: 12,
+                    borderBottomWidth: 1,
+                    borderBottomColor: "#eee",
+                  }}
+                  onPress={() => {
+                    setSelectedRestaurant(r);
+                    setCurrentRating(r.rating);
+                    setRestaurantDropdownVisible(false);
+                  }}
+                >
+                  <Text>{r.restaurantName}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <Pressable
+              style={styles.closeButton}
+              onPress={() => setRestaurantDropdownVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
       {/* Sentiment Modal */}
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
@@ -205,7 +300,7 @@ export default function ReviewPage({ route }) {
         </View>
       </Modal>
 
-      {/* ✅ NEW: Rating Change Modal */}
+      {/* Rating Modal */}
       <Modal animationType="slide" transparent={true} visible={ratingModalVisible}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -219,9 +314,6 @@ export default function ReviewPage({ route }) {
     </ScrollView>
   );
 }
-
-
-
 
 
 
@@ -248,6 +340,7 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
   closeButton: { marginTop: 15, backgroundColor: "#9E090F", paddingVertical: 12, borderRadius: 8, alignItems: "center" },
   closeButtonText: { color: "#fff", fontWeight: "bold", textAlign: "center" },
+  
 });
 
 

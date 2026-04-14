@@ -7,6 +7,7 @@ import Page1 from "./HomePage";
 import ReviewPage from "./ReviewPage";
 import Favourites from "./Favourites";
 import RestaurantDetails from "./RestaurantDetails";
+import Profile from "./Profile"
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -60,6 +61,19 @@ function TabNavigator() {
             <Image
               source={require("../assets/heart.png")}
               style={{ width: 22, height: 21, tintColor: color }}
+            />
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="Profile"
+        component={Profile}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Image
+              source={require("../assets/profile_icon_unselected.png")}
+              style={{ width: 24, height: 24, tintColor: color }}
             />
           ),
         }}
