@@ -16,6 +16,7 @@ import { imageMap } from "./imageMap";
 import Sentiment from "sentiment";
 import restaurants from "./restaurant.json";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ReviewPage({ route }) {
   const restaurant = route.params?.restaurant || null;
@@ -37,8 +38,35 @@ export default function ReviewPage({ route }) {
   const [currentRating, setCurrentRating] = useState(restaurant?.rating || 0);
   const [reviewCount, setReviewCount] = useState(50);
 
-  const handleSubmit = () => {
-    if (!reviewText.trim() || !selectedRestaurant) return;
+// ✅ FIXED: moved ABOVE handleSubmit so it NEVER breaks
+  const saveReview = async (rating) => {
+    try {
+      const currentUser = await AsyncStorage.getItem("currentUser");
+      const user = currentUser ? JSON.parse(currentUser) : null;
+
+      const stored = await AsyncStorage.getItem("reviews");
+      let reviews = stored ? JSON.parse(stored) : [];
+
+      const newReview = {
+        email: user?.email,
+        name: user?.name,
+        restaurant: selectedRestaurant?.restaurantName,
+        review: reviewText,
+        rating: rating,
+        createdAt: new Date().toISOString(),
+      };
+
+      reviews.push(newReview);
+
+      await AsyncStorage.setItem("reviews", JSON.stringify(reviews));
+    } catch (err) {
+      console.log("Error saving review:", err);
+    }
+  };
+
+
+const handleSubmit = async () => {
+      if (!reviewText.trim() || !selectedRestaurant) return;
 
     setLoading(true);
     setShowCTA(false);
@@ -47,8 +75,51 @@ export default function ReviewPage({ route }) {
       try {
         const startTime = Date.now(); // ✅ ADD HERE
 
-        const sentiment = new Sentiment();
+        // const sentiment = new Sentiment();
 
+const sentiment = new Sentiment({
+  extras: {
+    // 🔴 Negative strong words
+    pathetic: -5,
+    horrible: -5,
+    disgusting: -5,
+    trash: -5,
+    awful: -4,
+    terrible: -4,
+    worst: -5,
+    inedible: -5,
+    bland: -2,
+    disappointing: -3,
+    garbage: -5,
+    rubbish: -4,
+    mid: -2,
+
+    // 🔴 Strong emotional negatives
+    disgusting: -5,
+    gross: -4,
+    horrible: -5,
+    useless: -4,
+
+    // 🟢 Strong positive words
+    amazing: 5,
+    excellent: 5,
+    outstanding: 5,
+    delicious: 5,
+    tasty: 4,
+    perfect: 5,
+    brilliant: 4,
+    fantastic: 5,
+    incredible: 5,
+    yummy: 4,
+    great: 4,
+    awesome: 5,
+
+    // 🟢 Slang positive
+    fire: 4,
+    lit: 4,
+    banging: 4,
+  },
+});
         // ✅ FIXED VARIABLES
         const tokens = reviewText.toLowerCase().split(/\s+/);
         const clauses = reviewText.toLowerCase().split(/\bbut\b/);
@@ -80,6 +151,8 @@ export default function ReviewPage({ route }) {
         else if (adjustedScore >= 1) rating = 4;
         else if (adjustedScore <= -3) rating = 1;
         else if (adjustedScore <= -1) rating = 2;
+        
+        saveReview(rating);
 
         // ✅ RATING UPDATE
         const oldRating = currentRating;
@@ -164,6 +237,8 @@ const timeTaken = endTime - startTime;
       }
     }, 1000);
   };
+
+
 
 const getColor = (value) => {
   if (value === "Positive") return "#2ecc71";
@@ -362,6 +437,8 @@ const getColor = (value) => {
     </ScrollView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
