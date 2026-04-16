@@ -95,9 +95,7 @@ const sentiment = new Sentiment({
     mid: -2,
 
     // 🔴 Strong emotional negatives
-    disgusting: -5,
     gross: -4,
-    horrible: -5,
     useless: -4,
 
     // 🟢 Strong positive words
