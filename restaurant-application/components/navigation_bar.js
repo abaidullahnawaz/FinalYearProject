@@ -3,16 +3,17 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Image, StyleSheet } from "react-native";
 
+// Import screens
 import Page1 from "./HomePage";
 import ReviewPage from "./ReviewPage";
 import Favourites from "./Favourites";
 import RestaurantDetails from "./RestaurantDetails";
 import Profile from "./Profile"
 
+// Create navigators
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-/* Bottom Tab Navigator */
 function TabNavigator() {
   return (
     <Tab.Navigator
@@ -82,7 +83,6 @@ function TabNavigator() {
   );
 }
 
-/* Stack Navigator */
 export default function NavigationBar() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

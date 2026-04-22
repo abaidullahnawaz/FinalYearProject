@@ -11,28 +11,32 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen({ navigation }) {
+  // State for form inputs
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+// State for error modal
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
 
+// Function to show error in modal
   const showError = (message) => {
-    console.log("❌", message);
     setModalMessage(message);
     setModalVisible(true);
   };
 
+// Handle login logic
   const handleLogin = async () => {
-    console.log("🟢 Login clicked");
+    console.log("Login clicked");
 
+    // Validation
     if (!email || !password) {
       return showError("Please fill all fields");
     }
 
     try {
       const storedUsers = await AsyncStorage.getItem("users");
-      console.log("📦 Stored users:", storedUsers);
+      console.log("Stored users:", storedUsers);
 
       if (!storedUsers) {
         return showError("No users found. Please sign up.");
@@ -41,16 +45,19 @@ export default function LoginScreen({ navigation }) {
       let users = [];
 
       try {
+        // Parse stored JSON data
         users = JSON.parse(storedUsers);
         if (!Array.isArray(users)) users = [];
       } catch {
         users = [];
       }
 
+// Find matching user by email and password
       const user = users.find(
         (u) => u.email === email && u.password === password
       );
 
+    // Validation for no user
       if (!user) {
         return showError("Invalid email or password");
       }
@@ -58,11 +65,12 @@ export default function LoginScreen({ navigation }) {
       await AsyncStorage.setItem("currentUser", JSON.stringify(user));
       await AsyncStorage.setItem("loggedIn", "true");
 
-      console.log("✅ Login success");
+      console.log("Login success");
 
+    // Navigate to the home screen
       navigation.replace("Home");
     } catch (error) {
-      console.log("🔥 Login error:", error);
+      console.log("Login error:", error);
       showError("Something went wrong");
     }
   };
@@ -96,7 +104,6 @@ export default function LoginScreen({ navigation }) {
         Don't have an account? Sign Up
       </Text>
 
-      {/* ✅ MODAL */}
       <Modal transparent visible={modalVisible} animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback  } from "react";
 import {
   View,
   Text,
@@ -6,20 +6,39 @@ import {
   FlatList,
   Image,
 } from "react-native";
-import TopBanner from "./Top_Banner";
-import { imageMap } from "./imageMap";
-import { sharedFavourites } from "./HomePage";
+
+import TopBanner from "./Top_Banner"; // Import custom top banner component
+import { imageMap } from "./imageMap"; //Loads images from the objects
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Favourites() {
-  const [favourites, setFavourites] = useState(sharedFavourites);
+const [favourites, setFavourites] = useState([]); //state to store the favourite restaurant
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFavourites([...sharedFavourites]);
-    }, 300);
+// gets the favourited restaurants and sets favourites if icon clicked on
+useFocusEffect(
+  useCallback(() => {
+    const loadFavourites = async () => {
+      const currentUser = await AsyncStorage.getItem("currentUser");
+      const user = currentUser ? JSON.parse(currentUser) : null;
 
-    return () => clearInterval(interval);
-  }, []);
+      if (!user) {
+        setFavourites([]);
+        return;
+      }
+
+      const stored = await AsyncStorage.getItem(`FAVOURITES_${user.email}`);
+
+      if (stored) {
+        setFavourites(JSON.parse(stored));
+      } else {
+        setFavourites([]);
+      }
+    };
+
+    loadFavourites();
+  }, [])
+);
 
   return (
     <View style={styles.container}>
@@ -32,7 +51,7 @@ export default function Favourites() {
       ) : (
         <FlatList
           data={favourites}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id.toString()} // Unique key for each item
           renderItem={({ item }) => (
             <View style={styles.card}>
               <Image source={imageMap[item.image]} style={styles.image} />

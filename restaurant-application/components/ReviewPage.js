@@ -13,32 +13,145 @@ import {
 } from "react-native";
 import TopBanner from "./Top_Banner";
 import { imageMap } from "./imageMap";
-import Sentiment from "sentiment";
+
+import Sentiment from "sentiment"; //Sentiment analysis library
+
 import restaurants from "./restaurant.json";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+
 export default function ReviewPage({ route }) {
-  const restaurant = route.params?.restaurant || null;
+  const restaurant = route.params?.restaurant || null; //get restaurant info from the previous screen
+  const [selectedRestaurant, setSelectedRestaurant] = useState(restaurant); //select restaurant from the dropdown
+  const [restaurantDropdownVisible, setRestaurantDropdownVisible] = useState(false); //Dropdown visibility
+  const [reviewText, setReviewText] = useState(""); //user input for review
+  const [loading, setLoading] = useState(false); //loading states
 
-  const [selectedRestaurant, setSelectedRestaurant] = useState(restaurant);
-  const [restaurantDropdownVisible, setRestaurantDropdownVisible] = useState(false);
+  //analysis results
+  const [analysis, setAnalysis] = useState(null); 
+  const [aiAnalysis, setAiAnalysis] = useState(null);
 
-  const [reviewText, setReviewText] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState(null);
   const [showCTA, setShowCTA] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [simplifiedText, setSimplifiedText] = useState("");
   const [ratingModalVisible, setRatingModalVisible] = useState(false);
   const [ratingMessage, setRatingMessage] = useState("");
 
   const navigation = useNavigation();
-
   const [currentRating, setCurrentRating] = useState(restaurant?.rating || 0);
   const [reviewCount, setReviewCount] = useState(50);
+  const [aiModalVisible, setAiModalVisible] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [invalidModalVisible, setInvalidModalVisible] = useState(false);
+  const [aiProcessed, setAiProcessed] = useState(false);
 
-// ✅ FIXED: moved ABOVE handleSubmit so it NEVER breaks
+ const GROQ_API_KEY = "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";
+
+// Trigger AI only if review is valid
+const handleAIButtonPress = () => {
+  if (!isMeaningfulReview(reviewText)) {
+    setInvalidModalVisible(true);
+    return;
+  }
+  getAIInsight();
+};
+
+// Call GROQ API to simplify the review text
+const getAIInsight = async () => {
+  if (!reviewText.trim()) return;
+
+  setAiLoading(true);
+
+  try {
+    console.log("REVIEW SENT TO AI:", reviewText);
+
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        messages: [
+          {
+            role: "user",
+            content: `
+Return STRICT JSON ONLY:
+
+{
+  "original": "",
+  "simplified": "",
+  "overall": "",
+  "food": "",
+  "service": "",
+  "ambience": "",
+  "tone": ""
+}
+
+Rules:
+- Convert slang into simple sentiment words
+- Example:
+  "lit" → "very good"
+  "mid" → "average"
+  "trash" → "very bad"
+- Keep simplified sentence clear and formal
+- No explanation
+
+Review:
+${reviewText}
+`,
+          },
+        ],
+        temperature: 0.3,
+      }),
+    });
+
+    const data = await response.json();
+
+    console.log("FULL AI RESPONSE:", JSON.stringify(data, null, 2));
+
+    const text = data?.choices?.[0]?.message?.content || "{}";
+
+    console.log("RAW TEXT:", text);
+
+    const cleaned = text.replace(/```json|```/g, "").trim();
+
+    let parsed;
+
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch (err) {
+      console.log("JSON PARSE FAILED:", cleaned);
+      parsed = {};
+    }
+
+    console.log("PARSED RESULT:", parsed);
+
+// Store processed data
+    setSimplifiedText(parsed.simplified || reviewText);
+
+    setAiAnalysis({
+      original: parsed.original || reviewText,
+      simplified: parsed.simplified || reviewText,
+      overall: parsed.overall || "Not specified",
+      food: parsed.food || "Not specified",
+      service: parsed.service || "Not specified",
+      ambience: parsed.ambience || "Not specified",
+      tone: parsed.tone || "Neutral",
+    });
+    setAiProcessed(true);
+    setAiModalVisible(true);
+
+  } catch (err) {
+    console.log("AI ERROR:", err);
+  } finally {
+    setAiLoading(false);
+  }
+};
+
+// Save review to storage
   const saveReview = async (rating) => {
     try {
       const currentUser = await AsyncStorage.getItem("currentUser");
@@ -64,185 +177,155 @@ export default function ReviewPage({ route }) {
     }
   };
 
+// Checks to see if the text is meaningful
+const isMeaningfulReview = (text) => {
+  const cleaned = text.toLowerCase().trim();
+  const words = cleaned.split(/\s+/);
 
-const handleSubmit = async () => {
-      if (!reviewText.trim() || !selectedRestaurant) return;
+  if (words.length <= 3) return false;
+  if (!cleaned.includes("food")) return false;
+  const validWords = words.filter((word) => /[aeiou]/.test(word));
+  if (validWords.length < words.length / 2) return false;
 
-    setLoading(true);
-    setShowCTA(false);
+  return true;
+};
 
-    setTimeout(() => {
-      try {
-        const startTime = Date.now(); // ✅ ADD HERE
+// const handleSubmit = async () => {
+//   setAnalysis(null);
+//   setAiProcessed(false);
 
-        // const sentiment = new Sentiment();
+//   if (!reviewText.trim() || !selectedRestaurant) return;
 
-const sentiment = new Sentiment({
-  extras: {
-    // 🔴 Negative strong words
-    pathetic: -5,
-    horrible: -5,
-    disgusting: -5,
-    trash: -5,
-    awful: -4,
-    terrible: -4,
-    worst: -5,
-    inedible: -5,
-    bland: -2,
-    disappointing: -3,
-    garbage: -5,
-    rubbish: -4,
-    mid: -2,
+//   if (!isMeaningfulReview(reviewText)) {
+//     setInvalidModalVisible(true);
+//     return;
+//   }
 
-    // 🔴 Strong emotional negatives
-    gross: -4,
-    useless: -4,
+//   await getAIInsight();
+// };
 
-    // 🟢 Strong positive words
-    amazing: 5,
-    excellent: 5,
-    outstanding: 5,
-    delicious: 5,
-    tasty: 4,
-    perfect: 5,
-    brilliant: 4,
-    fantastic: 5,
-    incredible: 5,
-    yummy: 4,
-    great: 4,
-    awesome: 5,
+// Sentiment Analysis
+const runSentimentAnalysis = async () => {
+const startTime = performance.now();
+  const overallText = aiAnalysis?.simplified || reviewText;
 
-    // 🟢 Slang positive
-    fire: 4,
-    lit: 4,
-    banging: 4,
+  console.log("FINAL SENTIMENT INPUT:", overallText);
+
+  const sentiment = new Sentiment({
+    extras: {
+      average: -2,
+      okay: -1,
+      ok: -1,
+      fine: -1,
+      decent: -1,
+      normal: -1,
+      pathetic: -5,
+      horrible: -5,
+      disgusting: -5,
+      trash: -5,
+      awful: -4,
+      terrible: -4,
+      worst: -5,
+      inedible: -5,
+      bland: -2,
+      disappointing: -3,
+      garbage: -5,
+      rubbish: -4,
+      mid: -2,
+      gross: -4,
+      useless: -4,
+      cold: -2,
+      stale: -3,
+      soggy: -3,
+      oily: -2,
+      burnt: -4,
+      undercooked: -4,
+      overcooked: -3,
+      dry: -3,
+      tasteless: -4,
+      rubbery: -3,
+      salty: -2,
+      too_spicy: -1,
+      amazing: 5,
+      excellent: 5,
+      outstanding: 5,
+      delicious: 5,
+      tasty: 4,
+      perfect: 5,
+      brilliant: 4,
+      fantastic: 5,
+      incredible: 5,
+      yummy: 4,
+      great: 4,
+      awesome: 5,
+      fresh: 3,
+      juicy: 3,
+      crispy: 3,
+      tender: 4,
+      flavorful: 4,
+      well_cooked: 4,
+      fire: 4,
+      lit: 4,
+      banging: 4,
+    },
+  });
+
+  const result = sentiment.analyze(overallText);
+
+  let adjustedScore = result.score;
+  let rating = 3;
+
+  if (adjustedScore >= 3) rating = 5;
+    else if (adjustedScore >= 1) rating = 4;
+    else if (adjustedScore <= -3) rating = 1;
+    else if (adjustedScore <= -1) rating = 2;
+
+  await saveReview(rating); //save review
+
+const oldRating = currentRating;
+const totalScore = currentRating * reviewCount;
+
+// Update restaurant rating ynamically
+const newRating = (totalScore + rating) / (reviewCount + 1);
+const roundedNewRating = Number(newRating.toFixed(1));
+
+setCurrentRating(roundedNewRating);
+setReviewCount(reviewCount + 1);
+
+// Show rating update modal
+setRatingMessage(`⭐ Rating updated from ${oldRating} → ${roundedNewRating}`);
+setRatingModalVisible(true);
+
+setTimeout(() => {
+  setRatingModalVisible(false);
+}, 2500);
+
+  let sentimentLabel = "Neutral";
+  if (adjustedScore > 1) sentimentLabel = "Positive";
+  else if (adjustedScore < -1) sentimentLabel = "Negative";
+
+const endTime = performance.now();
+const timeTaken = (endTime - startTime).toFixed(2);
+
+// Set analysis result
+  setAnalysis({
+  input: overallText,
+  sentiment: sentimentLabel,
+  score: adjustedScore,
+  rawSentiment: result,
+  performance: {
+    timeTaken,
   },
 });
-        // ✅ FIXED VARIABLES
-        const tokens = reviewText.toLowerCase().split(/\s+/);
-        const clauses = reviewText.toLowerCase().split(/\bbut\b/);
-
-        const result = sentiment.analyze(reviewText);
-
-        // ✅ OVERALL SENTIMENT
-        let adjustedScore = 0;
-
-        tokens.forEach((word, idx) => {
-          let val = sentiment.analyze(word).score;
-
-          if (
-            idx > 0 &&
-            ["not", "didn't", "never", "no"].includes(tokens[idx - 1])
-          ) {
-            val = -val;
-          }
-
-          adjustedScore += val;
-        });
-
-        let sentimentLabel = "Neutral";
-        if (adjustedScore > 1) sentimentLabel = "Positive";
-        else if (adjustedScore < -1) sentimentLabel = "Negative";
-
-        let rating = 3;
-        if (adjustedScore >= 3) rating = 5;
-        else if (adjustedScore >= 1) rating = 4;
-        else if (adjustedScore <= -3) rating = 1;
-        else if (adjustedScore <= -1) rating = 2;
-        
-        saveReview(rating);
-
-        // ✅ RATING UPDATE
-        const oldRating = currentRating;
-        const totalScore = currentRating * reviewCount;
-
-        const newRating = (totalScore + rating) / (reviewCount + 1);
-        const roundedNewRating = Number(newRating.toFixed(1));
-
-        setCurrentRating(roundedNewRating);
-        setReviewCount(reviewCount + 1);
-
-        setRatingMessage(`⭐ Rating updated from ${oldRating} → ${roundedNewRating}`);
-        setRatingModalVisible(true);
-
-        setTimeout(() => {
-          setRatingModalVisible(false);
-        }, 2500);
-
-        // ✅ ASPECT SENTIMENT (FIXED WITH CLAUSES)
-        const aspectKeywords = {
-          food: ["food", "meal", "dish", "pizza", "burger", "taste", "flavor"],
-          service: ["service", "waiter", "staff", "server"],
-          ambience: ["ambience", "environment", "music", "decor", "lighting"],
-        };
-
-        const aspects = {};
-
-        Object.keys(aspectKeywords).forEach((aspect) => {
-          let score = 0;
-
-          clauses.forEach((clause) => {
-            const clauseTokens = clause.trim().split(/\s+/);
-
-            const hasAspect = clauseTokens.some((word) =>
-              aspectKeywords[aspect].includes(word)
-            );
-
-            if (hasAspect) {
-              clauseTokens.forEach((word, idx) => {
-                let val = sentiment.analyze(word).score;
-
-                if (
-                  idx > 0 &&
-                  ["not", "didn't", "never", "no"].includes(clauseTokens[idx - 1])
-                ) {
-                  val = -val;
-                }
-
-                score += val;
-              });
-            }
-          });
-
-          if (score > 0) aspects[aspect] = "Positive";
-          else if (score < 0) aspects[aspect] = "Negative";
-          else aspects[aspect] = "Neutral";
-        });
-        const endTime = Date.now();
-const timeTaken = endTime - startTime;
-
-        // ✅ SAVE ANALYSIS
-        setAnalysis({
-          sentiment: sentimentLabel,
-          score: adjustedScore,
-          rating,
-          performance: {
-    timeTaken, // ✅ ADD THIS
-  },
-          details: {
-            tokens,
-            positive: result.positive,
-            negative: result.negative,
-            aspects,
-          },
-        });
-
-      } catch (err) {
-        console.log("ERROR:", err);
-      } finally {
-        setLoading(false);
-        setShowCTA(true);
-      }
-    }, 1000);
-  };
-
-
-
-const getColor = (value) => {
-  if (value === "Positive") return "#2ecc71";
-  if (value === "Negative") return "#e74c3c";
-  return "#7f8c8d";
+  setModalVisible(true);
 };
+
+// UI 
+  const getColor = (value) => {
+    if (value === "Positive") return "#2ecc71";
+    if (value === "Negative") return "#e74c3c";
+    return "#7f8c8d";
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -293,77 +376,77 @@ const getColor = (value) => {
           value={reviewText}
           onChangeText={setReviewText}
           multiline
-        />
+        />  
 
-        <TouchableOpacity
-          style={styles.submitButton}
-          onPress={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.submitText}>Submit Review</Text>
-          )}
-        </TouchableOpacity>
-
-        {showCTA && analysis && (
-          <TouchableOpacity
-            style={styles.detailButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={styles.detailButtonText}>
-              Detailed Sentiment Calculator Analysis
-            </Text>
-          </TouchableOpacity>
+    {selectedRestaurant && reviewText.trim().length > 0 && (
+      <TouchableOpacity
+        style={[styles.submitButton, { backgroundColor: "#2c3e50", marginTop: 10 }]}
+        onPress={handleAIButtonPress}
+        disabled={aiLoading}
+      >
+        {aiLoading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.submitText}>AI Smart Analysis</Text>
         )}
-      </View>
+      </TouchableOpacity>
+    )}
 
-      {/* ✅ RESTAURANT MODAL */}
-      <Modal transparent visible={restaurantDropdownVisible}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Restaurant</Text>
+    {aiProcessed && (
+      <TouchableOpacity
+        style={[styles.submitButton, { backgroundColor: "#16a085", marginTop: 10 }]}
+        onPress={runSentimentAnalysis}
+      >
+        <Text style={styles.submitText}>Run Sentiment Analysis</Text>
+      </TouchableOpacity>
+    )}
+  </View>
 
-            <ScrollView style={{ maxHeight: 300 }}>
-              {restaurants.map((r) => (
-                <TouchableOpacity
-                  key={r.id}
-                  style={styles.restaurantItem}
-                  onPress={() => {
-                    setSelectedRestaurant(r);
-                    setCurrentRating(r.rating);
-                    setRestaurantDropdownVisible(false);
-                  }}
-                >
-                  <Text>{r.restaurantName}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+  <Modal transparent visible={restaurantDropdownVisible}>
+    <View style={styles.modalOverlay}>
+      <View style={styles.modalContent}>
+        <Text style={styles.modalTitle}>Select Restaurant</Text>
 
-            <Pressable
-              style={styles.closeButton}
-              onPress={() => setRestaurantDropdownVisible(false)}
+        <ScrollView style={{ maxHeight: 300 }}>
+          {restaurants.map((r) => (
+            <TouchableOpacity
+              key={r.id}
+              style={styles.restaurantItem}
+              onPress={() => {
+                setSelectedRestaurant(r);
+                setCurrentRating(r.rating);
+                setRestaurantDropdownVisible(false);
+              }}
             >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+              <Text>{r.restaurantName}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
-      {/* ✅ IMPROVED ANALYSIS MODAL */}
+        <Pressable
+          style={styles.closeButton}
+          onPress={() => setRestaurantDropdownVisible(false)}
+        >
+          <Text style={styles.closeButtonText}>Close</Text>
+        </Pressable>
+      </View>
+    </View>
+  </Modal>
+
 <Modal transparent visible={modalVisible}>
   <View style={styles.modalOverlay}>
     <View style={styles.modalContent}>
 
       <Text style={styles.modalTitle}>📊 Sentiment Analysis</Text>
-
       <ScrollView style={{ maxHeight: 350 }}>
 
-<Text style={{ marginTop: 10, fontWeight: "bold" }}>
-  ⏱️ Analysis Time: {analysis?.performance?.timeTaken} ms
-</Text>
-        {/* ✅ Overall Sentiment */}
+    <Text style={{ marginTop: 10, fontWeight: "bold" }}>
+      ⏱️ Analysis Time: {analysis?.performance?.timeTaken} ms
+    </Text>
+        <View style={styles.card}>
+  <Text style={styles.cardTitle}>Input Sent to Sentiment</Text>
+  <Text>{analysis?.input}</Text>
+</View>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Overall Sentiment</Text>
           <Text
@@ -376,39 +459,44 @@ const getColor = (value) => {
           </Text>
         </View>
 
-        {/* ✅ Aspect Breakdown */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Aspect Breakdown</Text>
+  <Text style={styles.cardTitle}>Raw Sentiment Output</Text>
 
-          {Object.entries(analysis?.details?.aspects || {}).map(([a, v]) => (
-            <View key={a} style={styles.aspectRow}>
-              <Text style={styles.aspectName}>{a}</Text>
-              <Text style={[styles.aspectValue, { color: getColor(v) }]}>
-                {v}
-              </Text>
-            </View>
-          ))}
-        </View>
+  <Text>Score: {analysis?.rawSentiment?.score}</Text>
 
-        {/* ✅ Positive Words */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Positive Words</Text>
-          <Text style={{ color: "#2ecc71" }}>
-            {analysis?.details?.positive?.length
-              ? analysis.details.positive.join(", ")
-              : "None"}
-          </Text>
-        </View>
+  <Text>Positive Words:</Text>
+  <Text>
+    {analysis?.rawSentiment?.positive?.length
+      ? analysis.rawSentiment.positive.join(", ")
+      : "None"}
+  </Text>
 
-        {/* ✅ Negative Words */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Negative Words</Text>
-          <Text style={{ color: "#e74c3c" }}>
-            {analysis?.details?.negative?.length
-              ? analysis.details.negative.join(", ")
-              : "None"}
-          </Text>
-        </View>
+  <Text>Negative Words:</Text>
+  <Text>
+    {analysis?.rawSentiment?.negative?.length
+      ? analysis.rawSentiment.negative.join(", ")
+      : "None"}
+  </Text>
+  <View style={styles.card}>
+  <Text style={styles.cardTitle}>Score → Rating Mapping</Text>
+
+  <Text>Adjusted Score: {analysis?.score}</Text>
+
+
+  <Text>
+    Rating:
+    {analysis?.score >= 3
+      ? " 5 ⭐"
+      : analysis?.score >= 1
+      ? " 4 ⭐"
+      : analysis?.score <= -3
+      ? " 1 ⭐"
+      : analysis?.score <= -1
+      ? " 2 ⭐"
+      : " 3 ⭐"}
+  </Text>
+</View>
+</View>
 
       </ScrollView>
 
@@ -423,15 +511,91 @@ const getColor = (value) => {
   </View>
 </Modal>
 
-      {/* ✅ RATING MODAL */}
       <Modal transparent visible={ratingModalVisible}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
+                      <Text style={styles.modalTitle}>The review has been submitted</Text>
             <Text style={styles.modalTitle}>Rating Updated</Text>
             <Text style={{ textAlign: "center" }}>{ratingMessage}</Text>
           </View>
         </View>
       </Modal>
+
+      <Modal transparent visible={aiModalVisible}>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+
+      <Text style={styles.modalTitle}>🧠 AI Review Insight</Text>
+      
+
+      <View style={styles.card}>
+  <Text style={styles.cardTitle}>Original Review</Text>
+  <Text>{aiAnalysis?.original}</Text>
+</View>
+
+<View style={styles.card}>
+  <Text style={styles.cardTitle}>Simplified (AI Processed)</Text>
+  <Text>{aiAnalysis?.simplified}</Text>
+</View>
+
+      <ScrollView style={{ maxHeight: 350 }}>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Overall</Text>
+          <Text>{aiAnalysis?.overall}</Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Food</Text>
+          <Text>{aiAnalysis?.food}</Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Service</Text>
+          <Text>{aiAnalysis?.service}</Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Ambience</Text>
+          <Text>{aiAnalysis?.ambience}</Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Tone</Text>
+          <Text>{aiAnalysis?.tone}</Text>
+        </View>
+
+      </ScrollView>
+
+      <Pressable
+        style={styles.closeButton}
+        onPress={() => setAiModalVisible(false)}
+      >
+        <Text style={styles.closeButtonText}>Close</Text>
+      </Pressable>
+
+    </View>
+  </View>
+</Modal>
+
+
+<Modal transparent visible={invalidModalVisible}>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalTitle}>Invalid Review</Text>
+      <Text style={{ textAlign: "center" }}>
+        Please write a proper review.
+      </Text>
+
+      <Pressable
+        style={styles.closeButton}
+        onPress={() => setInvalidModalVisible(false)}
+      >
+        <Text style={styles.closeButtonText}>OK</Text>
+      </Pressable>
+    </View>
+  </View>
+</Modal>
     </ScrollView>
   );
 }
@@ -510,6 +674,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
+    
   },
 
   modalContent: {
@@ -517,6 +682,8 @@ const styles = StyleSheet.create({
     width: "90%",
     borderRadius: 10,
     padding: 20,
+    marginTop: 20,
+    marginBottom: 20
   },
 
   modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
@@ -569,6 +736,3 @@ aspectValue: {
   fontWeight: "bold",
 },
 });
-
-
-

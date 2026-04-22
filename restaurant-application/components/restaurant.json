@@ -17,26 +17,6 @@
         "id": 102,
         "mealName": "Beef Karahi",
         "image": "beefkarahi"
-      },
-      {
-        "id": 103,
-        "mealName": "Chicken Biryani",
-        "image": "chickenbiryani"
-      },
-      {
-        "id": 104,
-        "mealName": "Beef Karahi",
-        "image": "beefkarahi"
-      },
-      {
-        "id": 103,
-        "mealName": "Chicken Biryani",
-        "image": "chickenbiryani"
-      },
-      {
-        "id": 104,
-        "mealName": "Beef Karahi",
-        "image": "beefkarahi"
       }
     ]
   },
@@ -56,26 +36,6 @@
       },
       {
         "id": 202,
-        "mealName": "Creamy Alfredo Pasta",
-        "image": "alfredopasta"
-      },
-      {
-        "id": 203,
-        "mealName": "Grilled Chicken Steak",
-        "image": "grilledchicken"
-      },
-      {
-        "id": 204,
-        "mealName": "Creamy Alfredo Pasta",
-        "image": "alfredopasta"
-      },
-      {
-        "id": 205,
-        "mealName": "Grilled Chicken Steak",
-        "image": "grilledchicken"
-      },
-      {
-        "id": 206,
         "mealName": "Creamy Alfredo Pasta",
         "image": "alfredopasta"
       }
@@ -99,26 +59,6 @@
         "id": 302,
         "mealName": "Pepperoni Pizza",
         "image": "pepperonipizza"
-      },
-      {
-        "id": 303,
-        "mealName": "Margherita Pizza",
-        "image": "margheritapizza"
-      },
-      {
-        "id": 304,
-        "mealName": "Pepperoni Pizza",
-        "image": "pepperonipizza"
-      },
-      {
-        "id": 305,
-        "mealName": "Margherita Pizza",
-        "image": "margheritapizza"
-      },
-      {
-        "id": 306,
-        "mealName": "Pepperoni Pizza",
-        "image": "pepperonipizza"
       }
     ]
   },
@@ -138,26 +78,6 @@
       },
       {
         "id": 402,
-        "mealName": "Tempura Rolls",
-        "image": "tempurarolls"
-      },
-      {
-        "id": 403,
-        "mealName": "Salmon Sushi",
-        "image": "salmonsushi"
-      },
-      {
-        "id": 404,
-        "mealName": "Tempura Rolls",
-        "image": "tempurarolls"
-      },
-      {
-        "id": 405,
-        "mealName": "Salmon Sushi",
-        "image": "salmonsushi"
-      },
-      {
-        "id": 406,
         "mealName": "Tempura Rolls",
         "image": "tempurarolls"
       }
@@ -181,27 +101,219 @@
         "id": 502,
         "mealName": "Chicken Crunch Burger",
         "image": "chickenburger"
-      },
-      {
-        "id": 503,
-        "mealName": "Classic Beef Burger",
-        "image": "beefburger"
-      },
-      {
-        "id": 504,
-        "mealName": "Chicken Crunch Burger",
-        "image": "chickenburger"
-      },
-      {
-        "id": 505,
-        "mealName": "Classic Beef Burger",
-        "image": "beefburger"
-      },
-      {
-        "id": 506,
-        "mealName": "Chicken Crunch Burger",
-        "image": "chickenburger"
       }
     ]
-  }
+  },
+  {
+  "id": 6,
+  "restaurantName": "Butt Karahi",
+  "location": "Lahore, Pakistan",
+  "category": "Pakistani",
+  "description": "Famous for traditional karahi cooked in desi ghee.",
+  "rating": 4.6,
+  "image": "buttkarahi",
+  "mapLink": "https://www.google.com/maps/search/Butt+Karahi+Lahore",
+  "meals": [
+    { "id": 601, "mealName": "Chicken Karahi", "image": "chickenkarahi" },
+    { "id": 602, "mealName": "Mutton Karahi", "image": "muttonkarahi" }
+  ]
+},
+{
+  "id": 7,
+  "restaurantName": "Monal",
+  "location": "Islamabad, Pakistan",
+  "category": "Pakistani",
+  "description": "Scenic rooftop dining with a variety of desi dishes.",
+  "rating": 4.7,
+  "image": "monal",
+  "mapLink": "https://www.google.com/maps/search/Monal+Islamabad",
+  "meals": [
+    { "id": 701, "mealName": "Chicken Handi", "image": "chickenhandi" },
+    { "id": 702, "mealName": "Seekh Kebab", "image": "seekhkebab" }
+  ]
+},
+{
+  "id": 8,
+  "restaurantName": "Kolachi",
+  "location": "Karachi, Pakistan",
+  "category": "BBQ",
+  "description": "Beachside dining with premium BBQ and seafood.",
+  "rating": 4.6,
+  "image": "kolachi",
+  "mapLink": "https://www.google.com/maps/search/Kolachi+Karachi",
+  "meals": [
+    { "id": 801, "mealName": "BBQ Platter", "image": "bbqplatter" },
+    { "id": 802, "mealName": "Grilled Fish", "image": "grilledfish" }
+  ]
+},
+{
+  "id": 9,
+  "restaurantName": "Salt’n Pepper",
+  "location": "Lahore, Pakistan",
+  "category": "Pakistani",
+  "description": "Iconic restaurant serving classic Pakistani cuisine.",
+  "rating": 4.4,
+  "image": "saltnpepper",
+  "mapLink": "https://www.google.com/maps/search/Salt+n+Pepper+Lahore",
+  "meals": [
+    { "id": 901, "mealName": "Chicken Qorma", "image": "chickenqorma" },
+    { "id": 902, "mealName": "Nihari", "image": "nihari" }
+  ]
+},
+{
+  "id": 10,
+  "restaurantName": "Hardee’s",
+  "location": "Dubai, UAE",
+  "category": "Fast Food",
+  "description": "Famous for thick burgers and loaded meals.",
+  "rating": 4.2,
+  "image": "hardees",
+  "mapLink": "https://www.google.com/maps/search/Hardees+Dubai",
+  "meals": [
+    { "id": 1001, "mealName": "Zinger Burger", "image": "zingerburger" },
+    { "id": 1002, "mealName": "Fries Bucket", "image": "fries" }
+  ]
+},
+{
+  "id": 11,
+  "restaurantName": "KFC",
+  "location": "Lahore, Pakistan",
+  "category": "Fast Food",
+  "description": "Global chain known for fried chicken.",
+  "rating": 4.0,
+  "image": "kfc",
+  "mapLink": "https://www.google.com/maps/search/KFC+Lahore",
+  "meals": [
+    { "id": 1101, "mealName": "Zinger Burger", "image": "zingerburger" },
+    { "id": 1102, "mealName": "Hot Wings", "image": "hotwings" }
+  ]
+},
+{
+  "id": 12,
+  "restaurantName": "McDonald's",
+  "location": "London, UK",
+  "category": "Fast Food",
+  "description": "World-famous fast food chain.",
+  "rating": 4.1,
+  "image": "mcdonalds",
+  "mapLink": "https://www.google.com/maps/search/McDonalds+London",
+  "meals": [
+    { "id": 1201, "mealName": "Big Mac", "image": "bigmac" },
+    { "id": 1202, "mealName": "McChicken", "image": "mcchicken" }
+  ]
+},
+{
+  "id": 13,
+  "restaurantName": "Domino’s Pizza",
+  "location": "Karachi, Pakistan",
+  "category": "Italian",
+  "description": "Popular pizza chain with quick delivery.",
+  "rating": 4.3,
+  "image": "dominos",
+  "mapLink": "https://www.google.com/maps/search/Dominos+Karachi",
+  "meals": [
+    { "id": 1301, "mealName": "Pepperoni Pizza", "image": "pepperonipizza" },
+    { "id": 1302, "mealName": "Cheese Burst Pizza", "image": "cheesepizza" }
+  ]
+},
+{
+  "id": 14,
+  "restaurantName": "Cafe Aylanto",
+  "location": "Lahore, Pakistan",
+  "category": "Continental",
+  "description": "Fine dining with Mediterranean flavors.",
+  "rating": 4.5,
+  "image": "aylanto",
+  "mapLink": "https://www.google.com/maps/search/Cafe+Aylanto+Lahore",
+  "meals": [
+    { "id": 1401, "mealName": "Grilled Steak", "image": "steak" },
+    { "id": 1402, "mealName": "Pasta Primavera", "image": "pasta" }
+  ]
+},
+{
+  "id": 15,
+  "restaurantName": "Nando’s",
+  "location": "Dubai, UAE",
+  "category": "Portuguese",
+  "description": "Flame-grilled peri-peri chicken.",
+  "rating": 4.4,
+  "image": "nandos",
+  "mapLink": "https://www.google.com/maps/search/Nandos+Dubai",
+  "meals": [
+    { "id": 1501, "mealName": "Peri Peri Chicken", "image": "perichicken" },
+    { "id": 1502, "mealName": "Espetada", "image": "espedata" }
+  ]
+},
+{
+  "id": 16,
+  "restaurantName": "PF Chang’s",
+  "location": "New York, USA",
+  "category": "Chinese",
+  "description": "Modern Asian cuisine with bold flavors.",
+  "rating": 4.3,
+  "image": "pfchangs",
+  "mapLink": "https://www.google.com/maps/search/PF+Changs+New+York",
+  "meals": [
+    { "id": 1601, "mealName": "Dynamite Shrimp", "image": "shrimp" },
+    { "id": 1602, "mealName": "Fried Rice", "image": "friedrice" }
+  ]
+},
+{
+  "id": 17,
+  "restaurantName": "Texas Roadhouse",
+  "location": "Texas, USA",
+  "category": "Steakhouse",
+  "description": "Famous for steaks and ribs.",
+  "rating": 4.6,
+  "image": "texas",
+  "mapLink": "https://www.google.com/maps/search/Texas+Roadhouse",
+  "meals": [
+    { "id": 1701, "mealName": "Ribeye Steak", "image": "ribeye" },
+    { "id": 1702, "mealName": "BBQ Ribs", "image": "bbqribs" }
+  ]
+},
+{
+  "id": 18,
+  "restaurantName": "Shake Shack",
+  "location": "New York, USA",
+  "category": "Fast Food",
+  "description": "Premium burgers and shakes.",
+  "rating": 4.5,
+  "image": "shakeshack",
+  "mapLink": "https://www.google.com/maps/search/Shake+Shack+New+York",
+  "meals": [
+    { "id": 1801, "mealName": "Shack Burger", "image": "burger" },
+    { "id": 1802, "mealName": "Vanilla Shake", "image": "shake" }
+  ]
+},
+{
+  "id": 19,
+  "restaurantName": "Wagamama",
+  "location": "London, UK",
+  "category": "Japanese",
+  "description": "Asian-inspired noodles and ramen.",
+  "rating": 4.3,
+  "image": "wagamama",
+  "mapLink": "https://www.google.com/maps/search/Wagamama+London",
+  "meals": [
+    { "id": 1901, "mealName": "Chicken Ramen", "image": "ramen" },
+    { "id": 1902, "mealName": "Yakisoba", "image": "yakisoba" }
+  ]
+},
+{
+  "id": 20,
+  "restaurantName": "Starbucks",
+  "location": "Global",
+  "category": "Cafe",
+  "description": "Popular coffeehouse chain.",
+  "rating": 4.2,
+  "image": "starbucks",
+  "mapLink": "https://www.google.com/maps/search/Starbucks",
+  "meals": [
+    { "id": 2001, "mealName": "Cappuccino", "image": "coffee" },
+    { "id": 2002, "mealName": "Chocolate Muffin", "image": "muffin" }
+  ]
+}
+
+
 ]

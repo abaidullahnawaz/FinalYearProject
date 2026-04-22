@@ -11,73 +11,110 @@ import {
   TouchableOpacity,
 } from "react-native";
 import TopBanner from "./Top_Banner";
-import restaurants from "./restaurant.json";
-import { imageMap } from "./imageMap";
+import restaurants from "./restaurant.json"; //Restaurant Data
+import { imageMap } from "./imageMap"; //Images of restaurants
+
+// Navigation hooks
 import { useNavigation } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
 
-// ✅ Shared variable
-export let sharedFavourites = [];
+// Local Storage
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Get screen width for responsive card sizing
 const screenWidth = Dimensions.get("window").width;
 const cardWidth = screenWidth / 2 - 20;
 
 export default function HomePage() {
+  // Search input state
   const [searchText, setSearchText] = useState("");
+  // Selected category filter
   const [selectedCategory, setSelectedCategory] = useState("All");
-
-  // ✅ initialize from shared state (important fix)
-  const [favourites, setFavourites] = useState(sharedFavourites);
-
+  // Favourite restaurants state
+  const [favourites, setFavourites] = useState([]);
+// Navigation object to transition between screens
   const navigation = useNavigation();
 
+// Generates unique categories from restaurant data
   const categories = useMemo(() => {
     const unique = [...new Set(restaurants.map((r) => r.category))];
     return ["All", ...unique];
   }, []);
 
+// Filters the restaurants in terms of categories
   const filteredRestaurants = useMemo(() => {
     return restaurants.filter((restaurant) => {
       const matchesSearch = restaurant.restaurantName
         .toLowerCase()
         .includes(searchText.toLowerCase());
 
+// Matches the selected categories
       const matchesCategory =
         selectedCategory === "All" ||
         restaurant.category === selectedCategory;
 
+// Returns items with both conditions
       return matchesSearch && matchesCategory;
     });
   }, [searchText, selectedCategory]);
 
-  // ✅ FIX: re-sync whenever user comes back to this tab
+// Loads the page with the favourites selected from last time
   useFocusEffect(
-    useCallback(() => {
-      setFavourites([...sharedFavourites]);
-    }, [])
-  );
+  useCallback(() => {
+    const loadFavourites = async () => {
+      const currentUser = await AsyncStorage.getItem("currentUser");
+      const user = currentUser ? JSON.parse(currentUser) : null;
 
-  const toggleFavourite = (item) => {
-    const exists = favourites.find((r) => r.id === item.id);
+      if (!user) {
+        setFavourites([]);
+        return;
+      }
+
+      const stored = await AsyncStorage.getItem(`FAVOURITES_${user.email}`);
+
+      if (stored) {
+        setFavourites(JSON.parse(stored));
+      } else {
+        setFavourites([]);
+      }
+    };
+
+    loadFavourites();
+  }, [])
+);
+
+const toggleFavourite = async (item) => {
+  const currentUser = await AsyncStorage.getItem("currentUser");
+  const user = currentUser ? JSON.parse(currentUser) : null;
+
+  if (!user) return;
+
+  setFavourites((prevFavourites) => {
+    const exists = prevFavourites.find((r) => r.id === item.id);
 
     let updated;
 
     if (exists) {
-      updated = favourites.filter((r) => r.id !== item.id);
+      updated = prevFavourites.filter((r) => r.id !== item.id);
     } else {
-      updated = [...favourites, item];
+      updated = [...prevFavourites, item];
     }
 
-    setFavourites(updated);
+    // Save using updated state
+    AsyncStorage.setItem(
+      `FAVOURITES_${user.email}`,
+      JSON.stringify(updated)
+    );
 
-    // ✅ sync globally
-    sharedFavourites = updated;
-  };
+    return updated;
+  });
+};
 
-  const isFavourite = (id) => {
-    return favourites.some((r) => r.id === id);
-  };
+const isFavourite = (id) => {
+  return favourites.some((r) => r.id === id);
+};
 
+// Render each restaurant card
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
@@ -85,19 +122,21 @@ export default function HomePage() {
         navigation.navigate("RestaurantDetails", { restaurant: item })
       }
     >
-      {/* ❤️ Heart Icon */}
+      {/* Heart Icon */}
       <TouchableOpacity
         style={styles.heartIcon}
         onPress={(e) => {
-          e.stopPropagation();
+          e.stopPropagation(); // Prevent triggering parent onPress
           toggleFavourite(item);
         }}
       >
         <Text style={{ fontSize: 18 }}>
+         {/* Filled heart if favourite, otherwise outline */}
           {isFavourite(item.id) ? "❤️" : "🤍"}
         </Text>
       </TouchableOpacity>
 
+      {/* Restaurant image */}
       <Image source={imageMap[item.image]} style={styles.image} />
       <Text style={styles.name}>{item.restaurantName}</Text>
       <Text style={styles.rating}>⭐ {item.rating}</Text>
@@ -109,7 +148,7 @@ export default function HomePage() {
     <View style={styles.container}>
       <TopBanner />
 
-      {/* 🔎 Search */}
+      {/* Search */}
       <View style={styles.searchContainer}>
         <TextInput
           placeholder="Search restaurants..."
@@ -144,7 +183,7 @@ export default function HomePage() {
         </ScrollView>
       </View>
 
-      {/* 🍽 List */}
+      {/* List */}
       <FlatList
         data={filteredRestaurants}
         keyExtractor={(item) => item.id.toString()}

@@ -9,14 +9,14 @@ import {
   ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { imageMap } from "./imageMap";
+import { imageMap } from "./imageMap"; //image mapping
 
 const screenWidth = Dimensions.get("window").width;
 const cardWidth = screenWidth / 2 - 20;
 
 export default function RestaurantDetails({ route }) {
-  const navigation = useNavigation();
-  const { restaurant } = route.params;
+  const navigation = useNavigation(); //navigation going back n forth
+  const { restaurant } = route.params; //get restaurant data passed from previous screen
 
   return (
     <ScrollView
@@ -24,14 +24,12 @@ export default function RestaurantDetails({ route }) {
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
-      {/* Back Button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Restaurant Banner */}
       <Image source={imageMap[restaurant.image]} style={styles.banner} />
 
       {/* Restaurant Info */}
@@ -40,7 +38,6 @@ export default function RestaurantDetails({ route }) {
       <Text style={styles.rating}>⭐ {restaurant.rating}</Text>
       <Text style={styles.description}>{restaurant.description}</Text>
 
-      {/* ⭐ CTA Button */}
       <TouchableOpacity
         style={styles.reviewButton}
         onPress={() => navigation.navigate("ReviewPage", { restaurant })}
@@ -48,10 +45,8 @@ export default function RestaurantDetails({ route }) {
         <Text style={styles.reviewButtonText}>Add a Review</Text>
       </TouchableOpacity>
 
-      {/* Menu Title */}
       <Text style={styles.menuTitle}>Menu</Text>
 
-      {/* Meals Grid */}
       <View style={styles.mealsContainer}>
         {restaurant.meals.map((meal) => (
           <View key={meal.id} style={styles.mealCard}>
@@ -72,7 +67,7 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     padding: 15,
-    paddingBottom: 120,
+    paddingBottom: 900,
   },
 
   header: {
@@ -138,10 +133,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    paddingBottom: 20,
+
   },
 
   mealCard: {
-    width: cardWidth,
+    width: "48%",
     backgroundColor: "#f5f5f5",
     borderRadius: 10,
     marginBottom: 10,
