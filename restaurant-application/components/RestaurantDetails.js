@@ -19,6 +19,7 @@ export default function RestaurantDetails({ route }) {
   const { restaurant } = route.params; //get restaurant data passed from previous screen
 
   return (
+    // ScrollView allows vertical scrolling if the content is large
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.scrollContent}

@@ -45,18 +45,30 @@ export default function SignupScreen({ navigation }) {
     }
 
     try {
+      // Retrieve existing users from AsycStorage
       const storedUsers = await AsyncStorage.getItem("users");
+
+      // Covert stored JSON string into JS Array
       let users = storedUsers ? JSON.parse(storedUsers) : [];
+      
+      // Check if email already exists in stored users
       const existingUser = users.find((u) => u.email === email);
+
+      
       if (existingUser) {
         return showError("Email already exists. Please login.");
       }
-      //adds new user
+      
+      // Create new user object
       const newUser = { name, email, password };
+      // Add new user to users array
       users.push(newUser);
 
+    // Save updated user list back to AsyncStorage
       await AsyncStorage.setItem("users", JSON.stringify(users));
+      // Store current logged in user
       await AsyncStorage.setItem("currentUser", JSON.stringify(newUser));
+      // Set login status flag
       await AsyncStorage.setItem("loggedIn", "true");
 
       navigation.replace("Home");

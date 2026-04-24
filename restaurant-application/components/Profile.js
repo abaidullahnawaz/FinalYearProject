@@ -15,35 +15,48 @@ export default function Page3({ navigation }) {
   // Stores the users reviews
   const [reviews, setReviews] = useState([]);
 
+// useFocEffect runs everytime this screen comes into focus
+// This ensures that the latest user data and reviews are always loaded
   useFocusEffect(
     useCallback(() => {
-      loadData();
+      loadData(); //Fetch user + review data
     }, [])
   );
 
 // Load user and reviews from storage
+//Retrieves the logged-in user's information from local storage
+//retireves all saved reviews
+//Filters reviews so the current user's reviews are shown
   const loadData = async () => {
     try {
       // Get current logged in user
       const currentUser = await AsyncStorage.getItem("currentUser");
+
+      //Convert stored JSON string into a JS object
       const parsedUser = currentUser ? JSON.parse(currentUser) : null;
 
+    //Save user data into state
       setUser(parsedUser);
 
-      // get all reviews
+      // Get all reviews stored in the app
       const storedReviews = await AsyncStorage.getItem("reviews");
+
+      // Convert JSON string into array
       const allReviews = storedReviews ? JSON.parse(storedReviews) : [];
 
+    // If no valid user found
       if (!parsedUser?.email) {
         setReviews([]);
         return;
       }
 
     // Filter only this users reviews
+    // done by matching email address
       const userReviews = allReviews.filter(
         (r) => r.email === parsedUser.email
       );
 
+      //Store filtered reviews in state
       setReviews(userReviews);
     } catch (err) {
       console.log("Profile load error:", err);
@@ -51,6 +64,8 @@ export default function Page3({ navigation }) {
   };
 
 // logout function
+//Clears login related data from storage
+// Redirects user back to the login screen
   const handleLogout = async () => {
     await AsyncStorage.removeItem("loggedIn");
     await AsyncStorage.removeItem("currentUser");

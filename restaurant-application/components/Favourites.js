@@ -16,26 +16,31 @@ export default function Favourites() {
 const [favourites, setFavourites] = useState([]); //state to store the favourite restaurant
 
 // gets the favourited restaurants and sets favourites if icon clicked on
+//getItem gets the currentUser's favourites and displays them
 useFocusEffect(
   useCallback(() => {
     const loadFavourites = async () => {
       const currentUser = await AsyncStorage.getItem("currentUser");
       const user = currentUser ? JSON.parse(currentUser) : null;
 
+      //If no user is logged in, clear the favourites
       if (!user) {
         setFavourites([]);
         return;
       }
 
+    /*Retrieves the favourites of the current logged in user since each user as its own separate favourites list*/ 
       const stored = await AsyncStorage.getItem(`FAVOURITES_${user.email}`);
 
+      /*If favourites exitst in the storage, parse and set them in a state variable*/
       if (stored) {
         setFavourites(JSON.parse(stored));
       } else {
+        /*if no favourites found then set an empty list*/
         setFavourites([]);
       }
     };
-
+    /*Call the function to load favourites*/
     loadFavourites();
   }, [])
 );
@@ -43,15 +48,16 @@ useFocusEffect(
   return (
     <View style={styles.container}>
       <TopBanner />
-
+      /*Screen heading*/
       <Text style={styles.heading}>Favourites</Text>
-
+      // If no favourites added
       {favourites.length === 0 ? (
         <Text style={styles.text}>No favourites added ❤️</Text>
       ) : (
         <FlatList
           data={favourites}
-          keyExtractor={(item) => item.id.toString()} // Unique key for each item
+          keyExtractor={(item) => item.id.toString()} // Unique key for each item in the Flat list
+          /*Defines how each restaurant name is to be displayed on the screen*/
           renderItem={({ item }) => (
             <View style={styles.card}>
               <Image source={imageMap[item.image]} style={styles.image} />

@@ -20,7 +20,7 @@ import restaurants from "./restaurant.json";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
+// Used for handling restaurant reviews and sentiment analysis
 export default function ReviewPage({ route }) {
   const restaurant = route.params?.restaurant || null; //get restaurant info from the previous screen
   const [selectedRestaurant, setSelectedRestaurant] = useState(restaurant); //select restaurant from the dropdown
@@ -46,6 +46,7 @@ export default function ReviewPage({ route }) {
   const [invalidModalVisible, setInvalidModalVisible] = useState(false);
   const [aiProcessed, setAiProcessed] = useState(false);
 
+// API key used to call GROQ AI Model
  const GROQ_API_KEY = "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";
 
 // Trigger AI only if review is valid
@@ -58,6 +59,7 @@ const handleAIButtonPress = () => {
 };
 
 // Call GROQ API to simplify the review text
+// Written a prompt for the model to read
 const getAIInsight = async () => {
   if (!reviewText.trim()) return;
 
@@ -112,6 +114,7 @@ ${reviewText}
 
     console.log("FULL AI RESPONSE:", JSON.stringify(data, null, 2));
 
+// Extract andclean AI response
     const text = data?.choices?.[0]?.message?.content || "{}";
 
     console.log("RAW TEXT:", text);
@@ -132,6 +135,7 @@ ${reviewText}
 // Store processed data
     setSimplifiedText(parsed.simplified || reviewText);
 
+// Store AI processed results
     setAiAnalysis({
       original: parsed.original || reviewText,
       simplified: parsed.simplified || reviewText,
@@ -204,13 +208,15 @@ const isMeaningfulReview = (text) => {
 //   await getAIInsight();
 // };
 
-// Sentiment Analysis
+// Performs sentiment analysis on review text
+// Uses custom dictionary to improve accuracy for food-related review
 const runSentimentAnalysis = async () => {
 const startTime = performance.now();
-  const overallText = aiAnalysis?.simplified || reviewText;
+const overallText = aiAnalysis?.simplified || reviewText;
 
   console.log("FINAL SENTIMENT INPUT:", overallText);
 
+// Create sentiment analyzer with custom word weights
   const sentiment = new Sentiment({
     extras: {
       average: -2,
@@ -275,6 +281,7 @@ const startTime = performance.now();
   let adjustedScore = result.score;
   let rating = 3;
 
+// convert sentiment scroe into star rating
   if (adjustedScore >= 3) rating = 5;
     else if (adjustedScore >= 1) rating = 4;
     else if (adjustedScore <= -3) rating = 1;
@@ -282,6 +289,7 @@ const startTime = performance.now();
 
   await saveReview(rating); //save review
 
+// Update restaurant rating dynamically
 const oldRating = currentRating;
 const totalScore = currentRating * reviewCount;
 
@@ -307,7 +315,7 @@ setTimeout(() => {
 const endTime = performance.now();
 const timeTaken = (endTime - startTime).toFixed(2);
 
-// Set analysis result
+// Set analysis result for UI display
   setAnalysis({
   input: overallText,
   sentiment: sentimentLabel,

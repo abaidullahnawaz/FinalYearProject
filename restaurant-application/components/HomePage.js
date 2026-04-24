@@ -23,7 +23,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Get screen width for responsive card sizing
 const screenWidth = Dimensions.get("window").width;
-const cardWidth = screenWidth / 2 - 20;
+const cardWidth = screenWidth / 2 - 20; //Each card takes up half of the screen
 
 export default function HomePage() {
   // Search input state
@@ -36,6 +36,10 @@ export default function HomePage() {
   const navigation = useNavigation();
 
 // Generates unique categories from restaurant data
+// Example: 'All', 'Fast Food'...
+// ... are the spread operator that converts the set back into a normal array
+//new Set removes all duplicates if any
+// ...unique takes all values in unique and inserts them into a new array
   const categories = useMemo(() => {
     const unique = [...new Set(restaurants.map((r) => r.category))];
     return ["All", ...unique];
@@ -49,6 +53,7 @@ export default function HomePage() {
         .includes(searchText.toLowerCase());
 
 // Matches the selected categories
+// If the selected category is equal to the restaurant category then it dis[plays those restaurant names
       const matchesCategory =
         selectedCategory === "All" ||
         restaurant.category === selectedCategory;
@@ -58,6 +63,7 @@ export default function HomePage() {
     });
   }, [searchText, selectedCategory]);
 
+
 // Loads the page with the favourites selected from last time
   useFocusEffect(
   useCallback(() => {
@@ -65,13 +71,15 @@ export default function HomePage() {
       const currentUser = await AsyncStorage.getItem("currentUser");
       const user = currentUser ? JSON.parse(currentUser) : null;
 
+    // If no user, clear favourites
       if (!user) {
         setFavourites([]);
         return;
       }
 
+    // Fetch favourites specific to the user
       const stored = await AsyncStorage.getItem(`FAVOURITES_${user.email}`);
-
+    // Update states if favourites exist
       if (stored) {
         setFavourites(JSON.parse(stored));
       } else {
@@ -83,12 +91,14 @@ export default function HomePage() {
   }, [])
 );
 
+// add or remove a restaurant from favourites
 const toggleFavourite = async (item) => {
   const currentUser = await AsyncStorage.getItem("currentUser");
   const user = currentUser ? JSON.parse(currentUser) : null;
 
   if (!user) return;
 
+  // Check if restaurant is already in the favourites
   setFavourites((prevFavourites) => {
     const exists = prevFavourites.find((r) => r.id === item.id);
 
@@ -110,11 +120,12 @@ const toggleFavourite = async (item) => {
   });
 };
 
+// check if a restaurant is already marked as favourite
 const isFavourite = (id) => {
   return favourites.some((r) => r.id === id);
 };
 
-// Render each restaurant card
+// Render each restaurant card in a grid
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}

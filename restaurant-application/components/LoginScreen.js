@@ -29,12 +29,13 @@ export default function LoginScreen({ navigation }) {
   const handleLogin = async () => {
     console.log("Login clicked");
 
-    // Validation
+    // Validation to ensure the fields are not empty
     if (!email || !password) {
       return showError("Please fill all fields");
     }
 
     try {
+      // Retrieve stored users from AsynchStorage
       const storedUsers = await AsyncStorage.getItem("users");
       console.log("Stored users:", storedUsers);
 
@@ -45,10 +46,12 @@ export default function LoginScreen({ navigation }) {
       let users = [];
 
       try {
-        // Parse stored JSON data
+        // Convert stores JSON string into a JS array
         users = JSON.parse(storedUsers);
+        // Ensure parsed data is actually an arry 
         if (!Array.isArray(users)) users = [];
       } catch {
+        // If parsing fails, reset users array
         users = [];
       }
 
@@ -62,12 +65,15 @@ export default function LoginScreen({ navigation }) {
         return showError("Invalid email or password");
       }
 
+    // Save logged in user session in AsynchStorage
       await AsyncStorage.setItem("currentUser", JSON.stringify(user));
+      // Flag to indicate user is logged in
       await AsyncStorage.setItem("loggedIn", "true");
 
       console.log("Login success");
 
-    // Navigate to the home screen
+    // Navigate to the home screen 
+    //'replace' prevents going back to login screen
       navigation.replace("Home");
     } catch (error) {
       console.log("Login error:", error);
@@ -156,7 +162,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 15,
   },
-  // ✅ MODAL STYLES
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.6)",
